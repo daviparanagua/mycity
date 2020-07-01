@@ -1,5 +1,6 @@
 var express = require("express");
 var bcrypt = require("bcrypt");
+const jwt = require('jsonwebtoken');
 var router = express.Router();
 const { pool } = require("../database");
 const { UCS2_ESPERANTO_CI } = require("mysql2/lib/constants/charsets");
@@ -50,7 +51,8 @@ router.post("/login", async function (req, res, next) {
       const hashPassword = user.password;
 
       if (await bcrypt.compare(triedPassword, hashPassword)) {
-        res.status(200).send(true);
+        const token = jwt.sign({id: user.id, username: user.username}, process.env.JWT_SECRET)
+        res.status(200).cookie('x-access-token', token, { maxAge: 900000, httpOnly: true }).send(true);
       } else {
         res.status(401).send(false);
       }

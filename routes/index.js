@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const router = express.Router();
 const { pool } = require("../database");
+const {verifyJWT} = require('../middlewares/auth')
 
 /* GET home page. */
 router.get("/",  function (req, res, next) {
@@ -14,5 +15,7 @@ router.get("/",  function (req, res, next) {
 });
 
 router.use("/users", require("./users"));
+
+router.get('/secret', verifyJWT)
 
 module.exports = router;
