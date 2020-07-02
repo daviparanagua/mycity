@@ -46,15 +46,15 @@ router.post("/login", async function (req, res, next) {
 
       const user = results[0];
       if (!user) {
-        return res.status(404).send();
+        return res.status(404).send({ok: false});
       }
       const hashPassword = user.password;
 
       if (await bcrypt.compare(triedPassword, hashPassword)) {
-        const token = jwt.sign({id: user.id, username: user.username}, process.env.JWT_SECRET)
-        res.status(200).cookie('x-access-token', token, { maxAge: 900000, httpOnly: true }).send(true);
+        const token = jwt.sign({id: user.id, username: user.username}, process.env.JWT_SECRET, {expiresIn: '7d'})
+        res.status(200).cookie('authToken', token, { maxAge: 900000, httpOnly: true }).send({ok: true, id:user.id});
       } else {
-        res.status(401).send(false);
+        res.status(401).send({ok: false});
       }
     } catch (err) {
       console.error(err);

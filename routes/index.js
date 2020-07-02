@@ -16,6 +16,8 @@ router.get("/",  function (req, res, next) {
 
 router.use("/users", require("./users"));
 
-router.get('/secret', verifyJWT)
+router.get('/secret', verifyJWT, (req, res, next) => {
+  res.send({acessou: 'SECRETO!!!', user:req.user})
+})
 
 module.exports = router;
