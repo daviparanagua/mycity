@@ -9,7 +9,10 @@ var usersRouter = require('./routes/users');
 
 var app = express();
 
-app.use(cors())
+app.use(cors({origin: true, credentials: true}))
+
+
+app.options('*', cors())
 
 app.use(logger('dev'));
 app.use(express.json());
