@@ -4,7 +4,11 @@ const router = express.Router();
 const { pool } = require("../database");
 const {verifyJWT} = require('../middlewares/auth')
 
-/* GET home page. */
+/**
+ * @route GET /
+ * @returns {object} 200
+ * @returns {Error}  default - Unexpected error
+ */
 router.get("/",  function (req, res, next) {
   pool.getConnection().then(async (conn) => {
     const [results] = await conn.query("SELECT 1 + 1 AS resultado")
@@ -15,9 +19,6 @@ router.get("/",  function (req, res, next) {
 });
 
 router.use("/users", require("./users"));
-
-router.get('/secret', verifyJWT, (req, res, next) => {
-  res.send({acessou: 'SECRETO!!!', user:req.user})
-})
+router.use("/cities", verifyJWT, require("./cities"));
 
 module.exports = router;

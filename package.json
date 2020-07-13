@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
+    "watch": "nodemon ./bin/www",
     "deploy": "gcloud app deploy",
     "setup": "node setup",
-    "deploy-dev": "gcloud functions deploy runramon-dev --runtime nodejs12 --entry-point app  --allow-unauthenticated --trigger-http",
+    "deploy-dev": "gcloud functions deploy citydavi-dev --runtime nodejs12 --entry-point app  --allow-unauthenticated --trigger-http",
     "deploy-prod": "gcloud functions deploy runramon --runtime nodejs12 --entry-point app  --allow-unauthenticated --trigger-http"
   },
   "dependencies": {
@@ -16,8 +17,10 @@
     "debug": "~2.6.9",
     "dotenv": "^8.2.0",
     "express": "~4.16.1",
+    "express-swagger-generator": "^1.1.17",
     "jsonwebtoken": "^8.5.1",
     "morgan": "~1.9.1",
     "mysql2": "^2.1.0"
-  }
+  },
+  "devDependencies": {}
 }

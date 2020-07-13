@@ -3,9 +3,29 @@ var bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 var router = express.Router();
 const { pool } = require("../database");
-const { UCS2_ESPERANTO_CI } = require("mysql2/lib/constants/charsets");
+const { verifyJWT } = require("../middlewares/auth");
 
-/* GET users listing. */
+
+/**
+ * Obtém informações do usuário logado
+ * @route GET /users/me
+ * @group users - Operações de usuário
+ * @returns {object} 200 - Dados do usuário
+ * @returns {Error}  default - Unexpected error
+ */
+router.get('/me', verifyJWT, function(req,res,next){
+  res.send(req.user)
+})
+
+/**
+ * Cadastra um novo usuário
+ * @route GET /users/register
+ * @group users - Operações de usuário
+ * @param {string} username.body.required - nome de usuário
+ * @param {string} password.body.required - nome de usuário
+ * @returns {object} 200 - Dados do usuário
+ * @returns {Error}  default - Unexpected error
+ */
 router.post("/register", async function (req, res, next) {
   const username = req.body.username;
   const rawpassword = req.body.password;
@@ -32,6 +52,15 @@ router.post("/register", async function (req, res, next) {
   }
 });
 
+/**
+ * Faz login com um usuário existente
+ * @route GET /users/login
+ * @group users - Operações de usuário
+ * @param {string} username.body.required - nome de usuário
+ * @param {string} password.body.required - nome de usuário
+ * @returns {object} 200 - Dados do usuário
+ * @returns {Error}  default - Unexpected error
+ */
 router.post("/login", async function (req, res, next) {
   const username = req.body.username;
   const triedPassword = req.body.password;
@@ -59,7 +88,7 @@ router.post("/login", async function (req, res, next) {
         );
         res
           .status(200)
-          .cookie("authToken", token, { maxAge: 900000, sameSite: false})
+          .cookie("authToken", token, { maxAge: (1000 * 60 * 60 * 24 * 30), sameSite: false})
           .send({ ok: true, id: user.id });
       } else {
         res.status(401).send({ ok: false });
