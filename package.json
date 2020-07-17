@@ -8,7 +8,7 @@
     "deploy": "gcloud app deploy",
     "setup": "node setup",
     "deploy-dev": "gcloud functions deploy citydavi-dev --runtime nodejs12 --entry-point app  --allow-unauthenticated --trigger-http",
-    "deploy-prod": "gcloud functions deploy runramon --runtime nodejs12 --entry-point app  --allow-unauthenticated --trigger-http"
+    "deploy-prod": "gcloud functions deploy citydavi --runtime nodejs12 --entry-point app  --allow-unauthenticated --trigger-http"
   },
   "dependencies": {
     "bcrypt": "^5.0.0",

@@ -19,7 +19,7 @@ router.get('/me', verifyJWT, function(req,res,next){
 
 /**
  * Cadastra um novo usuário
- * @route GET /users/register
+ * @route POST /users/register
  * @group users - Operações de usuário
  * @param {string} username.body.required - nome de usuário
  * @param {string} password.body.required - nome de usuário
@@ -54,7 +54,7 @@ router.post("/register", async function (req, res, next) {
 
 /**
  * Faz login com um usuário existente
- * @route GET /users/login
+ * @route POST /users/login
  * @group users - Operações de usuário
  * @param {string} username.body.required - nome de usuário
  * @param {string} password.body.required - nome de usuário

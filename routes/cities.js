@@ -12,7 +12,7 @@ const citiesController = require("../controllers/cities");
 router.get("/", citiesController.myCities);
 
 /**
- * Cria uma nova cidade para o usuário
+ * Cria uma nova cidade
  * @route POST /cities
  * @param {string} name.body.required Nome da cidade
  * @param {integer} x.body.required Coordenada X
@@ -24,6 +24,39 @@ router.get("/", citiesController.myCities);
 router.post("/", citiesController.buildCity);
 
 /**
+ * Obtém dados da cidade
+ * @route GET /cities/:id
+ * @group cities - Operações de cidades
+ * @param {integer} id.params.required ID da Cidade
+ * @returns {object} 200 - Dados do usuário
+ * @returns {Error}  default - Unexpected error
+ */
+router.get("/:id", citiesController.getCity);
+
+
+/**
+ * Simula construção de um edifício na cidade
+ * @route POST /cities/:id/build
+ * @group cities - Operações de cidades
+ * @param {integer} id.params.required ID da Cidade
+ * @param {string} building.body.required ID do edifício a construir (Ex.: sawmill)
+ * @returns {object} 200 - Dados do usuário
+ * @returns {Error}  default - Unexpected error
+ */
+router.get("/:id/build", (req, res, next) =>{ req.simulation = true; next()} , citiesController.build);
+
+/**
+ * Constrói um edifício na cidade
+ * @route POST /cities/:id/build
+ * @group cities - Operações de cidades
+ * @param {integer} id.params.required ID da Cidade
+ * @param {string} building.body.required ID do edifício a construir (Ex.: sawmill)
+ * @returns {object} 200 - Dados do usuário
+ * @returns {Error}  default - Unexpected error
+ */
+router.post("/:id/build", citiesController.build);
+
+/**
  * Busca cidade nas coordenadas X,Y
  * @route GET /cities/:x/:y
  * @group cities - Operações de cidades
@@ -33,5 +66,6 @@ router.post("/", citiesController.buildCity);
  * @returns {Error}  default - Unexpected error
  */
 router.get("/:x/:y", citiesController.cityInCoords);
+
 
 module.exports = router;
