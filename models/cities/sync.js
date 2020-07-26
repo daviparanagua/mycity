@@ -21,6 +21,9 @@ async function sync(city) {
         fields.push(building);
         values.push(city.buildings[building]);
       }
+      
+      fields.push('population');
+      values.push(city.population);
 
       const fieldsString = fields.join(" = ?,") + "= ?";
 

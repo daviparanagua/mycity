@@ -25,7 +25,6 @@ module.exports = async function(city, updateUntil) {
       for (let [res, value] of Object.entries(gameRules.population.resources.mod)) {
         resourcesPerSecond[res] += value * city.population
       };
-      console.log(resourcesPerSecond)
 
       // By Buildings
       for (let [buildingId, building] of Object.entries(gameRules.buildings)) {
@@ -70,7 +69,6 @@ module.exports = async function(city, updateUntil) {
       }
 
       city.resourcesMaxStorage = resourcesMaxStorage;
-      city.lastUpdated = updateUntil;
     } finally {
       conn.release();
     }

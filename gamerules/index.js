@@ -24,7 +24,8 @@ const rules = {
       mod: {
         food: perHour(-1)
       }
-    }
+    },
+    growth: perHour(0.05)/24
   },
   buildings: {
     farm: {

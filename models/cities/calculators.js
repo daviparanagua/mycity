@@ -14,4 +14,8 @@ function buildTime(city, building, additionalLevels = 0) {
   );
 }
 
-module.exports = { calculateScale, buildTime };
+const perHour = (value) => value / 3600;
+
+const perDay = (value) => perHour(value) / 24;
+
+module.exports = { calculateScale, buildTime, perHour, perDay };

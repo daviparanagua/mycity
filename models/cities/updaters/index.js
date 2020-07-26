@@ -6,6 +6,7 @@ const { calculateScale, buildTime } = require("../calculators");
 const updateResources = require('./updateResources');
 const updateBuildOptions = require('./updateBuildOptions');
 const updateEvents = require('./updateEvents');
+const updatePopulation = require('./updatePopulation');
 const build = require('./build');
 
 
@@ -14,8 +15,10 @@ module.exports = {
     updateUntil.setMilliseconds(0);
     city = await this.updateEvents(city);
     city = await this.updateResources(city, updateUntil);
+    city = await this.updatePopulation(city, updateUntil);
     city = await this.updateBuildings(city);
     city = await this.updateBuildOptions(city);
+    city.lastUpdated = updateUntil;
     return city;
   },
   async organize(city) {
@@ -38,6 +41,7 @@ module.exports = {
     return city;
   },
   updateBuildOptions,
+  updatePopulation,
   build,
   async consumeResources(city, resourcesCost, simulation) {
     let updates = [];
