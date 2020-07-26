@@ -19,6 +19,13 @@ const rules = {
     storageScale: 1.1,
     list: basicResources
   },
+  population: {
+    resources: {
+      mod: {
+        food: perHour(-1)
+      }
+    }
+  },
   buildings: {
     farm: {
       costs: {
@@ -69,7 +76,10 @@ const rules = {
         base: { wood: 100, stone: 100 },
         scale: { wood: 1.3, stone: 1.15 },
         time: 60,
-        timeScale: 1.07
+        timeScale: 1.07,
+        requires: {
+          storage: 2
+        }
       }
     },
     storage: {
