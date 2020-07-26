@@ -31,14 +31,15 @@ async function sync(city) {
     }
 
     // Events
-    if (city.events.length > 1) {
+    if (city.events.length > 0) {
+        
       const deletableEvents = city.events
         .map((ev) => {
           if (ev.resolved) return ev.eventId;
         })
         .filter(Boolean);
+        
       if (deletableEvents.length > 0) {
-        console.log(deletableEvents);
         await conn.query(
           `DELETE FROM citiesEvents WHERE eventId IN (${deletableEvents.join(
             ","

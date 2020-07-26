@@ -2,13 +2,12 @@ const Exception = require("../../helpers/Exception");
 const gameRules = require("../../gamerules");
 const { pool } = require("../../database");
 const updaters = require("./updaters");
-const {processEvent} = require("./eventProcessor");
-const {sync} = require("./sync");
-
+const { processEvent } = require("./eventProcessor");
+const { sync } = require("./sync");
 
 module.exports = {
-  async getCities(filters, getResources = false, useConn = null) {
-    const conn = useConn || (await pool.getConnection());
+  async getCities(filters, getResources = false) {
+    const conn = await pool.getConnection();
     let events, results, resFields;
 
     try {
@@ -40,18 +39,18 @@ module.exports = {
       // get details
       if (getResources) {
         // Event processing loop
+        debugger;
         for (city of results) {
-          let finalPass = false;
           city.events = events.filter((ev) => ev.cityId == city.id);
           city = await this.organize(city);
-          for(let event of events) {
+          for (let event of city.events) {
             if (+event.eventEnd > Date.now()) break;
-  
+
             let updateUntil = event.eventEnd;
             city = await this.updateCycleVariants(city, updateUntil);
             city = await this.processEvent(city, event);
             event.resolved = true;
-          };
+          }
           // Update until present
           city = await this.updateCycleVariants(city, new Date());
           await this.sync(city);
@@ -60,14 +59,31 @@ module.exports = {
 
       return results;
     } finally {
-      if (!useConn) conn.release();
+      conn.release();
     }
   },
-  async getCityById(cityId, getResources = false, useConn = null) {
-    const city = (
-      await this.getCities([["id", "=", cityId]], getResources, useConn)
-    )[0];
+  async getCityById(cityId, options = {}) {
+    let city = (await this.getCities([["id", "=", cityId]], true, options))[0];
+    // Se opções
+
+    city = this.filterVisibleInfo(city, options);
+
     return city;
+  },
+  filterVisibleInfo(city, options) {
+    if (options.unrestricted) return city
+    if (options.userId != city.userId) {
+      city = this.applyWhitelist(city, ["id", "userId", "name", "x", "y"]);
+    }
+    return city;
+  },
+  applyWhitelist(city, allowed) {
+    return Object.keys(city)
+      .filter((key) => allowed.includes(key))
+      .reduce((obj, key) => {
+        obj[key] = city[key];
+        return obj;
+      }, {});
   },
   async buildCity(userId, params) {
     if (!params.name || !"x" in params || !"y" in params)

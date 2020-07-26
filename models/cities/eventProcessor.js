@@ -1,9 +1,3 @@
-const gameRules = require("../../gamerules");
-const { pool } = require("../../database");
-const { calculateScale, buildTime } = require("./calculators");
-const { buildings } = require("../../gamerules");
-
-
 const processors = {
     build(city, event) {
         const building = event.building;

@@ -65,6 +65,17 @@ router.post("/:id/build", citiesController.build);
  * @returns {object} 200 - Dados do usuário
  * @returns {Error}  default - Unexpected error
  */
+router.get("/:xStart/:yStart/:xEnd/:yEnd", citiesController.citiesInRange);
+
+/**
+ * Busca cidade nas coordenadas X,Y
+ * @route GET /cities/:x/:y
+ * @group cities - Operações de cidades
+ * @param {integer} x.params.required Coordenada X
+ * @param {integer} y.params.required Coordenada Y
+ * @returns {object} 200 - Dados do usuário
+ * @returns {Error}  default - Unexpected error
+ */
 router.get("/:x/:y", citiesController.cityInCoords);
 
 

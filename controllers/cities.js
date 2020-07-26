@@ -15,7 +15,7 @@ module.exports = {
   },
   async getCity(req, res, next) {
     try {
-      const city = await citiesModel.getCityById(req.params.id, false);
+      const city = await citiesModel.getCityById(req.params.id, {userId: req.userId} );
       res.send(city);
     } catch (err) {
       if(!err.isException) console.error(err);
@@ -27,6 +27,20 @@ module.exports = {
       const cities = await citiesModel.getCities([
         ["x", "=", req.params.x],
         ["y", "=", req.params.y]
+      ]);
+      res.send(cities);
+    } catch (err) {
+      if(!err.isException) console.error(err);
+      res.status(500).send(err);
+    }
+  },
+  async citiesInRange(req, res, next) {
+    try {
+      const cities = await citiesModel.getCities([
+        ["x", ">=", req.params.xStart],
+        ["y", ">=", req.params.yStart],
+        ["x", "<=", req.params.xEnd],
+        ["y", "<=", req.params.yEnd]
       ]);
       res.send(cities);
     } catch (err) {

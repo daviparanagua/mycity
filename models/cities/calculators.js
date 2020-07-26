@@ -11,7 +11,7 @@ function buildTime(city, building, additionalLevels = 0) {
     buildingCosts.time,
     buildingCosts.timeScale,
     city.buildings[building] + additionalLevels
-  ) * 1000;
+  );
 }
 
 module.exports = { calculateScale, buildTime };

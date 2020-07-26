@@ -86,9 +86,13 @@ router.post("/login", async function (req, res, next) {
           process.env.JWT_SECRET,
           { expiresIn: "7d" }
         );
+        const cookieOptions = { maxAge: (1000 * 60 * 60 * 24 * 30)}
+        if(process.env.NODE_ENV === 'production') {
+          cookieOptions = {...cookieOptions, sameSite: 'none', secure: true}
+        }
         res
           .status(200)
-          .cookie("authToken", token, { maxAge: (1000 * 60 * 60 * 24 * 30), sameSite: false})
+          .cookie("authToken", token, cookieOptions)
           .send({ ok: true, id: user.id });
       } else {
         res.status(401).send({ ok: false });

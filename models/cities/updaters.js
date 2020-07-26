@@ -44,11 +44,12 @@ module.exports = {
       }
 
       // Enqueue remaining events
-      const eventDuration = buildTime(
+      const eventDurationMs = buildTime(
         city,
         event.building,
         additionalLevelForEnqueuement[event.building] - 1
       ); // -1 because self should't count
+      const eventDuration = eventDurationMs * 1000;
       event.eventStart = lastEventOfType[event.eventType].eventEnd;
       event.eventEnd = new Date(+new Date(event.eventStart) + eventDuration);
       lastEventOfType[event.eventType] = event;
@@ -81,8 +82,11 @@ module.exports = {
           building.resources.mod
         ) {
           for (let resource in building.resources.mod) {
-            resourcesPerSecond[resource] +=
-              building.resources.mod[resource] * city.buildings[buildingId];
+            resourcesPerSecond[resource] += calculateScale(
+              building.resources.mod[resource].base,
+              building.resources.mod[resource].scale,
+              city.buildings[buildingId]
+            );
           }
         }
         if (
@@ -149,10 +153,11 @@ module.exports = {
   async build(cityId, building, userId, simulation = true) {
     const conn = await pool.getConnection();
     try {
-      const city = await this.getCityById(cityId, true);
+      const city = await this.getCityById(cityId, { unrestricted: true });
       const canBuild = (userId = city.userId);
 
       if (!canBuild) throw new Exception(403, "Cannot build in this city");
+
       if (!(building in city.buildOptions))
         throw new Exception(422, "Invalid building");
 
@@ -163,7 +168,6 @@ module.exports = {
       const consumeResources = await this.consumeResources(
         city,
         buildingCosts.costs,
-        conn,
         simulation
       );
 
@@ -176,61 +180,79 @@ module.exports = {
         });
       }
 
-      conn.query(
-        `INSERT INTO citiesEvents (cityId, eventType, eventStart, eventEnd) VALUES (?, ?, ?, ?)`,
-        [
-          city.id,
-          "build",
-          new Date(),
-          new Date(Date.now() + city.buildOptions[building].time * 1000)
-        ]
-      );
+      await Promise.all[
+        (conn.query(
+          `INSERT INTO citiesEvents (cityId, eventType, eventStart, eventEnd) VALUES (?, ?, ?, ?)`,
+          [
+            city.id,
+            "build",
+            new Date(),
+            new Date(Date.now() + city.buildOptions[building].time * 1000)
+          ]
+        ),
+        conn.query(
+          "INSERT INTO eventsBuild (eventId, building) VALUES (LAST_INSERT_ID(), ?)",
+          [building]
+        ))
+      ];
 
-      conn.query(
-        "INSERT INTO eventsBuild (eventId, building) VALUES (LAST_INSERT_ID(), ?)",
-        [building]
-      );
-      
       if (simulation) {
         conn.rollback();
       } else {
-        conn.commit();
+        await conn.commit();
       }
       return true;
     } finally {
       conn.release();
     }
   },
-  async consumeResources(city, resourcesCost, conn, simulation) {
+  async consumeResources(city, resourcesCost, simulation) {
     let updates = [];
     let wheres = [];
-    let values = [];
+    let updateValues = [];
+    let whereValues = [];
 
-    for (let resource in resourcesCost) {
-      updates.push(" ?? = ?? - ? ");
-      values = values.concat([resource, resource, resourcesCost[resource]]);
-      wheres.push(" ?? >= ? ");
-      values = values.concat([resource, resourcesCost[resource]]);
-    }
-    city.missingResources = {};
-    for (let resource in city.resources) {
-      if (city.resources[resource] < resourcesCost[resource]) {
-        city.missingResources[resource] =
-          city.resources[resource] - resourcesCost[resource];
+    const conn = await pool.getConnection();
+    try {
+      for (let resource in resourcesCost) {
+        updates.push(" ?? = ?? - ? ");
+        updateValues = updateValues.concat([
+          resource,
+          resource,
+          resourcesCost[resource]
+        ]);
+        wheres.push(" ?? >= ? ");
+        whereValues = whereValues.concat([resource, resourcesCost[resource]]);
       }
+      city.missingResources = {};
+      for (let resource in city.resources) {
+        if (city.resources[resource] < resourcesCost[resource]) {
+          city.missingResources[resource] =
+            city.resources[resource] - resourcesCost[resource];
+        }
+      }
+
+      if (Object.keys(city.missingResources).length > 0) return false;
+
+      if (simulation) return true;
+
+      for (let resource in resourcesCost) {
+        city.resources -= resourcesCost[resource];
+      }
+
+      const [
+        results,
+        fields
+      ] = await conn.query(
+        `UPDATE citiesResources SET ${updates.join(
+          ", "
+        )} WHERE cityId = ${pool.escape(city.id)} AND ${wheres.join(" AND ")}`,
+        [...updateValues, ...whereValues]
+      );
+
+      return results.affectedRows > 0;
+    } finally {
+      conn.release();
     }
-
-    if (Object.keys(city.missingResources).length > 0) return false;
-
-    if (simulation) return true;
-
-    const [results, fields] = await conn.query(
-      `UPDATE citiesResources SET ${updates.join(
-        ", "
-      )} WHERE cityId = ${pool.escape(city.id)} AND ${wheres.join(" AND ")}`,
-      values
-    );
-
-    return results.affectedRows > 0;
   }
 };
