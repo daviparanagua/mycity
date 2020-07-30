@@ -32,6 +32,7 @@ module.exports = {
           `SELECT * FROM citiesEvents ce 
           LEFT JOIN eventsBuild eb ON ce.eventType = 'build' AND ce.eventId = eb.eventID
           WHERE cityId IN (${cityIds})
+          ORDER BY eventEnd ASC
           `
         );
       }
@@ -39,21 +40,9 @@ module.exports = {
       // get details
       if (getResources) {
         // Event processing loop
-        debugger;
         for (city of results) {
           city.events = events.filter((ev) => ev.cityId == city.id);
-          city = await this.organize(city);
-          for (let event of city.events) {
-            if (+event.eventEnd > Date.now()) break;
-
-            let updateUntil = event.eventEnd;
-            city = await this.updateCycleVariants(city, updateUntil);
-            city = await this.processEvent(city, event);
-            event.resolved = true;
-          }
-          // Update until present
-          city = await this.updateCycleVariants(city, new Date());
-          await this.sync(city);
+          city = this.updateCity(city)
         }
       }
 

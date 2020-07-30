@@ -20,6 +20,7 @@ const rules = {
     list: basicResources
   },
   population: {
+    baseGrowth: 2,
     resources: {
       mod: {
         food: perHour(-1)
@@ -33,8 +34,9 @@ const rules = {
         base: { wood: 50 },
         scale: { wood: 1.3 },
         time: 30,
-        timeScale: 1.3
+        timeScale: 1.3,
       },
+      population: {base: 3, scale: 1.2 },
       resources: {
         mod: { food: {base: perHour(40), scale: 1.238990371 } }
       }
@@ -46,6 +48,7 @@ const rules = {
         time: 50,
         timeScale: 1.36
       },
+      population: {base: 3, scale: 1.2 },
       resources: {
         mod: { wood: {base: perHour(40), scale: 1.238990371 } }
       }
@@ -57,6 +60,7 @@ const rules = {
         time: 60,
         timeScale: 1.07
       },
+      population: {base: 3, scale: 1.2 },
       resources: {
         mod: { iron: {base: perHour(30), scale: 1.238990371 } }
       }
@@ -68,6 +72,7 @@ const rules = {
         time: 60,
         timeScale: 1.2
       },
+      population: {base: 3, scale: 1.2 },
       resources: {
         mod: { iron: {base: perHour(30), scale: 1.238990371 } }
       }
@@ -81,7 +86,8 @@ const rules = {
         requires: {
           storage: 2
         }
-      }
+      },
+      population: {base: 3, scale: 1.2 },
     },
     storage: {
       costs: {
@@ -90,6 +96,7 @@ const rules = {
         time: 35,
         timeScale: 1.1
       },
+      population: {base: 3, scale: 1.2 },
       resources: {
         max: (() => {
           const r = {};

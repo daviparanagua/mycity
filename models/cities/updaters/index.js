@@ -11,6 +11,32 @@ const build = require('./build');
 
 
 module.exports = {
+  async updateCity(city){
+    city.internal = {};
+    
+      city = await this.organize(city);
+      city = await this.calculateBreakpoints(city);
+      for (let event of city.events) {
+        if (+event.eventEnd > Date.now()) break;
+
+        let updateUntil = event.eventEnd;
+
+        console.log(`event - ${updateUntil}`)
+        
+        city = await this.updateCycleVariants(city, updateUntil);
+        city = await this.processEvent(city, event);
+
+
+      }
+
+      console.log(city.internal.breakpoints)
+      
+      // Update until present
+      city = await this.updateCycleVariants(city, new Date());
+      await this.sync(city);
+      return city
+    
+  },
   async updateCycleVariants(city, updateUntil) {
     updateUntil.setMilliseconds(0);
     city = await this.updateEvents(city);
@@ -32,6 +58,11 @@ module.exports = {
       city.resources[resource] = city[resource];
       delete city[resource];
     }
+
+    return city;
+  },
+  calculateBreakpoints(city) {
+    city.internal.breakpoints = {a:'b'}
 
     return city;
   },
