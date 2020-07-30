@@ -43,7 +43,7 @@ module.exports = {
         for (city of results) {
           city.events = events.filter((ev) => ev.cityId == city.id);
           city = await this.updateCity(city)
-          delete city.internal
+          // delete city.internal
         }
       }
 

@@ -10,9 +10,11 @@ const updatePopulation = require("./updatePopulation");
 const build = require("./build");
 const cities = require("..");
 
+const MAX_ITERATIONS = 10000;
+
 module.exports = {
   async updateCity(city) {
-    const FixedDate = new Date()
+    const FixedDate = new Date();
     city.internal = {};
 
     city = await this.organize(city);
@@ -24,10 +26,13 @@ module.exports = {
     while (city.internal.breakpoints.length > 0) {
       const breakpoint = city.internal.breakpoints.shift();
       if (breakpoint.time > new Date()) break;
-      if (i > 9) break;
+      if (i > MAX_ITERATIONS) {
+        console.error("Max iterations exceeded");
+        break;
+      }
       i++;
 
-      console.log(breakpoint.time);
+      console.log(breakpoint.type, breakpoint.time);
 
       let updateUntil = breakpoint.time;
 
@@ -91,6 +96,14 @@ module.exports = {
   updateBuildOptions,
   updatePopulation,
   build,
+  removeBreakpoint(city, type) {
+    const toDeleteIndex = city.internal.breakpoints.findIndex(
+      (item) => item.type == type
+    );
+    if (toDeleteIndex > -1) {
+      city.internal.breakpoints.splice(toDeleteIndex, 1);
+    }
+  },
   addBreakpoint(city, time, type, data) {
     city.internal.breakpoints.push({
       time,
@@ -101,6 +114,10 @@ module.exports = {
     city.internal.breakpoints = city.internal.breakpoints.sort(
       (a, b) => +a.time - +b.time
     );
+  },
+  addOrReplaceBreakpoint(city, time, type, data) {
+    this.removeBreakpoint(city, type);
+    this.addBreakpoint(city, time, type, data);
   },
   async consumeResources(city, resourcesCost, simulation) {
     let updates = [];
