@@ -20,7 +20,7 @@ const rules = {
     list: basicResources
   },
   population: {
-    baseGrowth: 2,
+    baseGrowth: perHour(2),
     resources: {
       mod: {
         food: perHour(-1)

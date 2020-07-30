@@ -9,6 +9,7 @@ const processors = {
 
 function processEvent(city, event) {
     city = processors[event.eventType](city, event)
+    event.resolved = true;
     return city
 }
 

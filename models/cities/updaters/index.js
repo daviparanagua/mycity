@@ -3,53 +3,60 @@ const gameRules = require("../../../gamerules");
 const { pool } = require("../../../database");
 const { calculateScale, buildTime } = require("../calculators");
 
-const updateResources = require('./updateResources');
-const updateBuildOptions = require('./updateBuildOptions');
-const updateEvents = require('./updateEvents');
-const updatePopulation = require('./updatePopulation');
-const build = require('./build');
-
+const updateResources = require("./updateResources");
+const updateBuildOptions = require("./updateBuildOptions");
+const updateEvents = require("./updateEvents");
+const updatePopulation = require("./updatePopulation");
+const build = require("./build");
+const cities = require("..");
 
 module.exports = {
-  async updateCity(city){
+  async updateCity(city) {
+    const FixedDate = new Date()
     city.internal = {};
-    
-      city = await this.organize(city);
-      city = await this.calculateBreakpoints(city);
-      for (let event of city.events) {
-        if (+event.eventEnd > Date.now()) break;
 
-        let updateUntil = event.eventEnd;
+    city = await this.organize(city);
+    city = await this.calculateEventBreakpoints(city);
 
-        console.log(`event - ${updateUntil}`)
-        
-        city = await this.updateCycleVariants(city, updateUntil);
-        city = await this.processEvent(city, event);
+    city = await this.updateCycleVariants(city, city.lastUpdated);
 
+    i = 0;
+    while (city.internal.breakpoints.length > 0) {
+      const breakpoint = city.internal.breakpoints.shift();
+      if (breakpoint.time > new Date()) break;
+      if (i > 9) break;
+      i++;
 
+      console.log(breakpoint.time);
+
+      let updateUntil = breakpoint.time;
+
+      city = await this.updateCycleVariants(city, updateUntil, breakpoint);
+
+      if (breakpoint.type == "event") {
+        city = await this.processEvent(city, breakpoint.data);
       }
+      city.lastUpdated = updateUntil;
+    }
 
-      console.log(city.internal.breakpoints)
-      
-      // Update until present
-      city = await this.updateCycleVariants(city, new Date());
-      await this.sync(city);
-      return city
-    
+    // Update until present
+    city = await this.updateCycleVariants(city, FixedDate);
+    city.lastUpdated = FixedDate;
+    await this.sync(city);
+    return city;
   },
-  async updateCycleVariants(city, updateUntil) {
-    updateUntil.setMilliseconds(0);
+  async updateCycleVariants(city, updateUntil, breakpoint) {
     city = await this.updateEvents(city);
     city = await this.updateResources(city, updateUntil);
-    city = await this.updatePopulation(city, updateUntil);
+    city = await this.updatePopulation(city, updateUntil, breakpoint);
     city = await this.updateBuildings(city);
     city = await this.updateBuildOptions(city);
-    city.lastUpdated = updateUntil;
     return city;
   },
   async organize(city) {
     city.resources = {};
     city.buildings = {};
+    city.lastUpdated = new Date(city.lastUpdated);
     for (let building of Object.keys(gameRules.buildings)) {
       city.buildings[building] = city[building];
       delete city[building];
@@ -61,8 +68,18 @@ module.exports = {
 
     return city;
   },
-  calculateBreakpoints(city) {
-    city.internal.breakpoints = {a:'b'}
+  calculateEventBreakpoints(city) {
+    const breakpoints = [];
+
+    for (event of city.events) {
+      breakpoints.push({
+        time: event.eventEnd,
+        type: "event",
+        data: event
+      });
+    }
+
+    city.internal.breakpoints = breakpoints;
 
     return city;
   },
@@ -74,6 +91,17 @@ module.exports = {
   updateBuildOptions,
   updatePopulation,
   build,
+  addBreakpoint(city, time, type, data) {
+    city.internal.breakpoints.push({
+      time,
+      type,
+      data
+    });
+
+    city.internal.breakpoints = city.internal.breakpoints.sort(
+      (a, b) => +a.time - +b.time
+    );
+  },
   async consumeResources(city, resourcesCost, simulation) {
     let updates = [];
     let wheres = [];

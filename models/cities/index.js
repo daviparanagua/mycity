@@ -42,7 +42,8 @@ module.exports = {
         // Event processing loop
         for (city of results) {
           city.events = events.filter((ev) => ev.cityId == city.id);
-          city = await this.updateCity(city);
+          city = await this.updateCity(city)
+          delete city.internal
         }
       }
 
