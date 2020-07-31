@@ -17,6 +17,10 @@ module.exports = async function updateBuildOptions(city) {
     }
 
     for (let building of Object.keys(gameRules.buildings)) {
+      
+      // Max level
+      if (city.buildings[building] >= gameRules.buildings[building].max) continue;
+
       const buildingCosts = gameRules.buildings[building].costs;
       if (!buildingCosts) continue;
 

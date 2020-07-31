@@ -30,6 +30,7 @@ const rules = {
   },
   buildings: {
     farm: {
+      max: 30,
       costs: {
         base: { wood: 50 },
         scale: { wood: 1.3 },
@@ -42,9 +43,10 @@ const rules = {
       }
     },
     sawmill: {
+      max: 30,
       costs: {
-        base: { wood: 5, iron: 40, stone: 40 },
-        scale: { wood: 1.1, iron: 1.25, stone: 1.25 },
+        base: { iron: 40, stone: 40 },
+        scale: { iron: 1.25, stone: 1.25 },
         time: 50,
         timeScale: 1.36
       },
@@ -54,6 +56,7 @@ const rules = {
       }
     },
     stonemine: {
+      max: 30,
       costs: {
         base: { wood: 60, iron: 30 },
         scale: { wood: 1.2, iron: 1.35 },
@@ -66,6 +69,7 @@ const rules = {
       }
     },
     ironmine: {
+      max: 30,
       costs: {
         base: { wood: 50, stone: 50 },
         scale: { wood: 1.2, stone: 1.25 },
@@ -78,6 +82,7 @@ const rules = {
       }
     },
     market: {
+      max: 30,
       costs: {
         base: { wood: 100, stone: 100 },
         scale: { wood: 1.3, stone: 1.15 },
@@ -90,6 +95,7 @@ const rules = {
       population: {base: 3, scale: 1.2 },
     },
     storage: {
+      max: 30,
       costs: {
         base: { wood: 200, stone: 200 },
         scale: { wood: 1.2, stone: 1.2 },
