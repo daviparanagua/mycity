@@ -29,6 +29,19 @@ const rules = {
     growth: perHour(0.05)/24
   },
   buildings: {
+    townhall: {
+      max: 30,
+      costs: {
+        base: { wood: 50 },
+        scale: { wood: 1.3 },
+        time: 30,
+        timeScale: 1.3,
+      },
+      population: {base: 3, scale: 1.2 },
+      resources: {
+        mod: { food: {base: perHour(40), scale: 1.238990371 } }
+      }
+    },
     farm: {
       max: 30,
       costs: {
