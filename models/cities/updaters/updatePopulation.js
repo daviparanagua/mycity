@@ -7,17 +7,21 @@ async function updatePopulation(city, updateUntil, breakpointCalled) {
   const secondsPassed = (+updateUntil - lastUpdatedTS) / 1000;
 
   // Base Growth
+  let totalIncrease = gameRules.population.baseGrowth;  // base
 
-  city.populationIncrease = gameRules.population.baseGrowth;
+  city.populationIncrease = totalIncrease;
 
   // Insufficient resources upkeep
   let mustKillPopulation = 0;
   for (let [res, value] of Object.entries(gameRules.population.resources.mod)) {
     const resourceForPopulation = value * city.population * -1;
-    console.log(res, resourceForPopulation)
-    if (city.resources[res] <= resourceForPopulation && city.resourcesIncome[res] <= resourceForPopulation) {
+    console.log(res, resourceForPopulation);
+    if (
+      city.resources[res] <= resourceForPopulation &&
+      city.resourcesIncome[res] <= resourceForPopulation
+    ) {
       mustKillPopulation = Math.ceil(city.population * 0.01);
-      console.log('MUST KILL ' + mustKillPopulation)
+      console.log("MUST KILL " + mustKillPopulation);
       this.addOrReplaceBreakpoint(
         city,
         new Date(updateUntil.getTime()),
