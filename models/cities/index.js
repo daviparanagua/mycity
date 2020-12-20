@@ -24,26 +24,28 @@ module.exports = {
         } WHERE ${escapedFilters}`
       );
 
-      const cityIds = results.map((res) => conn.escape(res.id)).join(",");
+      if (results.length) {
+        const cityIds = results.map((res) => conn.escape(res.id)).join(",");
 
-      // get events
-      if (getResources) {
-        [events] = await conn.query(
-          `SELECT * FROM citiesEvents ce 
+        // get events
+        if (getResources) {
+          [events] = await conn.query(
+            `SELECT * FROM citiesEvents ce 
           LEFT JOIN eventsBuild eb ON ce.eventType = 'build' AND ce.eventId = eb.eventID
           WHERE cityId IN (${cityIds})
           ORDER BY eventEnd ASC
           `
-        );
-      }
+          );
+        }
 
-      // get details
-      if (getResources) {
-        // Event processing loop
-        for (city of results) {
-          city.events = events.filter((ev) => ev.cityId == city.id);
-          city = await this.updateCity(city)
-          // delete city.internal
+        // get details
+        if (getResources) {
+          // Event processing loop
+          for (city of results) {
+            city.events = events.filter((ev) => ev.cityId == city.id);
+            city = await this.updateCity(city);
+            // delete city.internal
+          }
         }
       }
 
@@ -61,7 +63,7 @@ module.exports = {
     return city;
   },
   filterVisibleInfo(city, options) {
-    if (options.unrestricted) return city
+    if (options.unrestricted) return city;
     if (options.userId != city.userId) {
       city = this.applyWhitelist(city, ["id", "userId", "name", "x", "y"]);
     }
@@ -88,7 +90,7 @@ module.exports = {
       if (userCities.length >= gameRules.cities.minDistanceBetweenCities)
         throw new Exception(
           409,
-          `Too many cities. Maximum is ${gameRules.cities.minDistanceBetweenCities}`,
+          `Too many cities. Maximum is ${gameRules.cities.maxCities}`,
           userCities
         );
 
