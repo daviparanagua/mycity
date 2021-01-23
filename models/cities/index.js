@@ -77,17 +77,109 @@ module.exports = {
         return obj;
       }, {});
   },
+  // Creates first city
+  // WARN TODO : Slow and heavy
+  async fundCity(userId, params) {
+    if (!params.name) throw new Exception(400, "All parameters are required");
+
+    if (params.name.length < 2) throw new Exception(400, "Name is too short");
+
+    const conn = await pool.getConnection();
+    try {
+      // Already has city
+      const userCities = await this.getCities([["userId", "=", userId]]);
+      if (userCities.length > 0)
+        throw new Exception(409, `Too many cities. Maximum is 1`, userCities);
+
+      const begin = gameRules.world.size / 2,
+        end = gameRules.world.size,
+        beginX = gameRules.world.size / 2,
+        beginY = gameRules.world.size / 2,
+        endX = gameRules.world.size,
+        endY = gameRules.world.size;
+
+      let walker = begin,
+        suitable = [];
+
+      const citiesNearby = await this.getCities([
+        ["x", ">=", beginX],
+        ["y", ">=", beginY],
+        ["x", "<=", endX],
+        ["y", "<=", endY]
+      ]);
+
+      let proposedX = beginX,
+        proposedY = beginY,
+        chosen;
+
+      while (walker <= end) {
+        proposedX = beginX;
+        proposedY = walker;
+        while (proposedX <= walker) {
+          const nearby = citiesNearby.find(
+            (c) =>
+              c.x <= proposedX + gameRules.cities.minDistanceBetweenCities &&
+              c.x >= proposedX - gameRules.cities.minDistanceBetweenCities &&
+              c.y <= proposedY + gameRules.cities.minDistanceBetweenCities &&
+              c.y >= proposedY - gameRules.cities.minDistanceBetweenCities
+          );
+
+          if (!nearby) {
+            suitable.push({ proposedX, proposedY });
+          }
+          // console.log({proposedX, proposedY, nearby})
+          proposedX++;
+        }
+
+        proposedY = beginY;
+        proposedX = walker;
+        while (proposedY < walker) {
+          const nearby = citiesNearby.find(
+            (c) =>
+              c.x <= proposedX + gameRules.cities.minDistanceBetweenCities &&
+              c.x >= proposedX - gameRules.cities.minDistanceBetweenCities &&
+              c.y <= proposedY + gameRules.cities.minDistanceBetweenCities &&
+              c.y >= proposedY - gameRules.cities.minDistanceBetweenCities
+          );
+
+          if (!nearby) {
+            suitable.push({ proposedX, proposedY });
+          }
+
+          // console.log({proposedX, proposedY, nearby})
+          proposedY++;
+        }
+
+        if (suitable.length) {
+          chosen = suitable[Math.floor(Math.random() * suitable.length)];
+          break;
+        }
+        walker++;
+      }
+
+      const createdResults = this.buildCity(userId, {
+        ...params,
+        x: chosen.proposedX,
+        y: chosen.proposedY
+      });
+
+      return createdResults;
+    } finally {
+      conn.release();
+    }
+  },
   async buildCity(userId, params) {
     if (!params.name || !"x" in params || !"y" in params)
       throw new Exception(400, "All parameters are required");
 
     if (params.name.length < 2) throw new Exception(400, "Name is too short");
 
+    console.log(params);
     const conn = await pool.getConnection();
     try {
       // Not at or above city limit
       const userCities = await this.getCities([["userId", "=", userId]]);
-      if (userCities.length >= gameRules.cities.minDistanceBetweenCities)
+      if (userCities.length >= gameRules.cities.maxCities)
         throw new Exception(
           409,
           `Too many cities. Maximum is ${gameRules.cities.maxCities}`,

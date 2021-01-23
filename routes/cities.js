@@ -12,6 +12,16 @@ const citiesController = require("../controllers/cities");
 router.get("/", citiesController.myCities);
 
 /**
+ * Funda a primeira cidade
+ * @route POST /cities
+ * @param {string} name.body.required Nome da cidade
+ * @group cities - Operações de cidades
+ * @returns {object} 200 - Dados do usuário
+ * @returns {Error}  default - Unexpected error
+ */
+router.post("/first", citiesController.fundCity);
+
+/**
  * Cria uma nova cidade
  * @route POST /cities
  * @param {string} name.body.required Nome da cidade

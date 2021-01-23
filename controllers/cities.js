@@ -48,6 +48,15 @@ module.exports = {
       res.status(500).send(err);
     }
   },
+  async fundCity(req, res, next) {
+    try {
+      const cities = await citiesModel.fundCity(req.userId, { ...req.body });
+      res.send(cities);
+    } catch (err) {
+      if(!err.isException) console.error(err);
+      res.status(err.status || 500).send(err);
+    }
+  },
   async buildCity(req, res, next) {
     try {
       const cities = await citiesModel.buildCity(req.userId, { ...req.body });

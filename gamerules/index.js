@@ -3,6 +3,9 @@ const perHour = (value) => value / 3600;
 const basicResources = ["food", "wood", "iron", "stone"];
 
 const rules = {
+  world: {
+    size: 30
+  },
   cities: {
     minDistanceBetweenCities: 2,
     maxCities: 2
