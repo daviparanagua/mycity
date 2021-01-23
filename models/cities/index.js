@@ -87,9 +87,12 @@ module.exports = {
     const conn = await pool.getConnection();
     try {
       // Already has city
-      const userCities = await this.getCities([["userId", "=", userId]]);
-      if (userCities.length > 0)
-        throw new Exception(409, `Too many cities. Maximum is 1`, userCities);
+      if (userId > 0 && !params.ignoreMax) {
+        // Only testing
+        const userCities = await this.getCities([["userId", "=", userId]]);
+        if (userCities.length > 0)
+          throw new Exception(409, `Too many cities. Maximum is 1`, userCities);
+      }
 
       const begin = gameRules.world.size / 2,
         end = gameRules.world.size,
@@ -157,6 +160,10 @@ module.exports = {
         walker++;
       }
 
+      if(!chosen) {
+        throw new Exception(409, `Cannot fund any more cities`);
+      }
+
       const createdResults = this.buildCity(userId, {
         ...params,
         x: chosen.proposedX,
@@ -179,7 +186,8 @@ module.exports = {
     try {
       // Not at or above city limit
       const userCities = await this.getCities([["userId", "=", userId]]);
-      if (userCities.length >= gameRules.cities.maxCities)
+
+      if (userCities.length >= gameRules.cities.maxCities && userId > 0 && !params.ignoreMax)
         throw new Exception(
           409,
           `Too many cities. Maximum is ${gameRules.cities.maxCities}`,
