@@ -17,6 +17,7 @@ const rules = {
       stone: perHour(10)
     },
     baseResourceStorage: { wood: 100, food: 100, stone: 50 },
+    starting: { wood: 50, food:50, stone: 20},
     resourceGainScale: 1,
     storageBase: 20,
     storageScale: 1.1,
@@ -34,6 +35,8 @@ const rules = {
   buildings: {
     townhall: {
       max: 30,
+      min: 1,
+      start: 1,
       costs: {
         base: { wood: 50 },
         scale: { wood: 1.3 },
@@ -47,6 +50,8 @@ const rules = {
     },
     farm: {
       max: 30,
+      min: 1,
+      start: 1,
       costs: {
         base: { wood: 50 },
         scale: { wood: 1.3 },
@@ -60,6 +65,8 @@ const rules = {
     },
     sawmill: {
       max: 30,
+      min: 1,
+      start: 1,
       costs: {
         base: { iron: 40, stone: 40 },
         scale: { iron: 1.25, stone: 1.25 },
@@ -73,6 +80,8 @@ const rules = {
     },
     stonemine: {
       max: 30,
+      min: 1,
+      start: 1,
       costs: {
         base: { wood: 60, iron: 30 },
         scale: { wood: 1.2, iron: 1.35 },
@@ -86,6 +95,8 @@ const rules = {
     },
     ironmine: {
       max: 30,
+      min: 0,
+      start: 0,
       costs: {
         base: { wood: 50, stone: 50 },
         scale: { wood: 1.2, stone: 1.25 },
