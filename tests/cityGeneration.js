@@ -3,7 +3,7 @@ const citiesModel = require("../models/cities");
 
 async function generateCities(amount) {
   let cities = [];
-  for (let i = 0; i <= amount; i++) {
+  for (let i = 0; i < amount; i++) {
     cities.push(
       await citiesModel
         .fundCity(0, { name: "Teste", ignoreMax: true })
@@ -18,4 +18,4 @@ async function generateCities(amount) {
   return cities;
 }
 
-generateCities(20);
+generateCities(3);
